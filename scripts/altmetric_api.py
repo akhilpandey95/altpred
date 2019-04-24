@@ -76,6 +76,12 @@ def add_all_info(alt_id):
             result['abstract'] = dict(json.loads(response.content))['abstract']
         else:
             result['abstract'] = ''
+
+        # add the pubdate
+        if 'published_on' in dict(json.loads(response.content)):
+            result['pub_date'] = dict(json.loads(response.content))['published_on']
+        else:
+            result['pub_date'] = ''
         
         # add the title of the article
         if 'title' in dict(json.loads(response.content)):
