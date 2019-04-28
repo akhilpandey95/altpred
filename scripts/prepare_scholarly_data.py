@@ -4,8 +4,8 @@
 # https://github.com/akhilpandey95/altpred/blob/master/LICENSE.
 
 import sys
-import numpy as np
 import pandas as pd
+from tqdm import tqdm
 from altmetric_api import add_all_info
 
 # function for preparing the 2014 altmetrics dataset
@@ -53,24 +53,12 @@ def data_processing(data_frame):
 
     """
     try:
-        # add the doi column
-        data_frame = data_frame.assign(DOI = [add_all_info(x)['doi'] for x in data_frame['ID']])
+        # add all the information from the dataframe
+        result = [add_all_info(x) for x in tqdm(data_frame['ID'])]
 
-        # add the abstract section for every article
-        data_frame = data_frame.assign(ABSTRACT = [add_all_info(x)['abstract'] for x in data_frame['ID']])
-
-        # add the title section for the article
-        data_frame = data_frame.assign(TITLE = [add_all_info(x)['title'] for x in data_frame['ID']])
-
-        # add the published date for every article
-        data_frame = data_frame.assign(PUB_DATE = [add_all_info(x)['pub_date'] for x in data_frame['ID']])
+        # concat the dataframes
+        data_frame = pd.concat([data_frame, pd.DataFrame(result)], axis=1)
         
-        # add the authors column
-        data_frame = data_frame.assign(AUTHORS = [add_all_info(x)['authors'] for x in data_frame['ID']])
-
-        # add the author count column
-        data_frame = data_frame.assign(AUTHOR_COUNT = [add_all_info(x)['author_count'] for x in data_frame['ID']])
-
         # return the dataframe
         return data_frame
     except:
@@ -81,11 +69,17 @@ if __name__ == '__main__':
     # read the data
     data = data_load('altmetrics_j2014_full.csv')
 
+    # process the dataframe
+    data = data_processing(data)
+
+    # export the data to a csv file
+    data.to_csv('altmetrics_j2014_full_alpha.csv')
+
     # print the head of the
-    print(data.head())
+    #print(data.head())
 
     # print the number of NA's in the DOI column
-    print(data_prepare()['DOI'].isnull().sum().sum())
+    #print(data_prepare()['DOI'].isnull().sum().sum())
 else:
     print('ERR: unable to run the script')
     sys.exit(0)
