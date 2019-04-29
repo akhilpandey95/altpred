@@ -48,7 +48,7 @@ def add_author_name(alt_id):
         return dict(json.loads(response.content))['authors']
     except:
         return ''
-    
+
 # add author information
 def add_all_info(alt_id):
     # create the dict
@@ -82,6 +82,12 @@ def add_all_info(alt_id):
             result['pub_date'] = dict(json.loads(response.content))['published_on']
         else:
             result['pub_date'] = ''
+
+        # add the twitter posts count as of 2018/19
+        if 'cited_by_tweeters_count' in dict(json.loads(response.content)):
+            result['twitter_count_y18'] = dict(json.loads(response.content))['cited_by_tweeters_count']
+        else:
+            result['twitter_count_y18'] = ''
         
         # add the title of the article
         if 'title' in dict(json.loads(response.content)):
