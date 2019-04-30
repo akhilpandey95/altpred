@@ -49,6 +49,22 @@ def add_author_name(alt_id):
     except:
         return ''
 
+# add published date of the article
+def add_pubdate(alt_id):
+    try:
+        response = requests.get("https://api.altmetric.com/v1/id/" + str(alt_id))
+        return dict(json.loads(response.content))['published_on']
+    except:
+        return ''
+
+# add twitter count of the article
+def add_twitter_count(alt_id):
+    try:
+        response = requests.get("https://api.altmetric.com/v1/id/" + str(alt_id))
+        return dict(json.loads(response.content))['cited_by_tweeters_count']
+    except:
+        return ''
+
 # add author information
 def add_all_info(alt_id):
     # create the dict
@@ -56,7 +72,7 @@ def add_all_info(alt_id):
     try:
         # make the request
         response = requests.get("https://api.altmetric.com/v1/id/" + str(alt_id))
-        
+
         # add the values to the dict
         if 'authors' in dict(json.loads(response.content)):
             result['author_count'] = len(dict(json.loads(response.content))['authors'])
@@ -64,13 +80,13 @@ def add_all_info(alt_id):
         else:
             result['author_count'] = ''
             result['authors'] = ''
-        
+
          # add the values to the dict
         if 'doi' in dict(json.loads(response.content)):
             result['doi'] = dict(json.loads(response.content))['doi']
         else:
             result['doi'] = ''
-        
+
         # add the abstract
         if 'abstract' in dict(json.loads(response.content)):
             result['abstract'] = dict(json.loads(response.content))['abstract']
@@ -88,14 +104,27 @@ def add_all_info(alt_id):
             result['twitter_count_y18'] = dict(json.loads(response.content))['cited_by_tweeters_count']
         else:
             result['twitter_count_y18'] = ''
-        
+
         # add the title of the article
         if 'title' in dict(json.loads(response.content)):
             result['title'] =  dict(json.loads(response.content))['title']
         else:
             result['title'] = ''
-        
+
         # return the result
         return result
     except:
         return result
+
+# function to ignore certain columns from the request
+def ignore_and_return_result(result, ignore):
+    try:
+        # ignore the keys that are requested in the list
+        result = {key: result[key] for key in result.keys() if key not in ignore}
+        
+        # return the result
+        return result
+    except:
+        # return the result
+        return result
+
