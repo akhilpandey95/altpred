@@ -83,13 +83,13 @@ def eliminate_row_by_pubdate(data_frame):
 
         # reset the dataframe index
         data_frame = data_frame.reset_index(drop=True)
-        
+
         # return the modified dataframe
         return data_frame
     except:
         # return the original dataframe
         return data_frame
-    
+
 # function for processing the dataset
 def data_processing(data_frame):
     """
@@ -112,7 +112,7 @@ def data_processing(data_frame):
 
         # concat the dataframes
         data_frame = pd.concat([data_frame, pd.DataFrame(result)], axis=1)
-        
+
         # return the dataframe
         return data_frame
     except:

@@ -13,3 +13,7 @@ tramp
 .DS_Store
 .DS_Store?
 ._*
+
+# csv files
+*.csv
+src/*.csv
