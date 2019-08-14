@@ -4,15 +4,16 @@
 # https://github.com/akhilpandey95/altpred/blob/master/LICENSE.
 
 import sys
+import numpy as np
 import pandas as pd
 from tqdm import tqdm
 from datetime import datetime
-from altmetric_api import add_all_info, add_pubdate
+from altmetric_api import add_pubdate
 
 # function for preparing the 2014 altmetrics dataset
 def data_load(file_path):
     """
-    Clean and prepare the 2014 altmetrics dataset
+    Load the processed 2014 altmetrics dataset
 
     Parameters
     ----------
@@ -27,10 +28,10 @@ def data_load(file_path):
 
     try:
         # read the dataset first
-        data = pd.read_csv(file_path, sep='\t')
+        data = pd.read_csv(file_path, low_memory=False)
 
         # remove all the unecessary columns
-        data = data.drop(columns=['DOI', 'SCORE', 'PMID', 'ARXIV_ID', 'HANDLE', 'FACEBOOK_WALLS', 'BLOGS', 'GPLUS_ACCOUNTS', 'NEWS_OUTLETS'])
+        data = data.drop(columns=['Unnamed: 0'])
 
         # return the dataframe
         return data
@@ -53,7 +54,7 @@ def get_year_from_epoch(epoch):
         int
 
     """
-    return datetime.datetime.fromtimestamp(epoch).year
+    return datetime.fromtimestamp(epoch).year
 
 # function for eliminating unecessary rows
 def eliminate_row_by_pubdate(data_frame):
@@ -76,10 +77,10 @@ def eliminate_row_by_pubdate(data_frame):
         data_frame = data_frame.assign(pub_date = [add_pubdate(x) for x in tqdm(data_frame['ID'])])
 
         # drop the row whose row value is an empty string
-        data_frame = data_frame[data_frame.pub_date != '']
+        data_frame = data_frame.loc[data_frame.pub_date != ''].reset_index(drop=True)
 
         # remove the rows whose year of publishing is prior to 2014
-        data_frame = data_frame[date_frame['pub_date'].apply(get_year_from_epoch) == 2014]
+        data_frame = data_frame.loc[date_frame['pub_date'].apply(get_year_from_epoch) == 2014]
 
         # reset the dataframe index
         data_frame = data_frame.reset_index(drop=True)
@@ -107,11 +108,17 @@ def data_processing(data_frame):
 
     """
     try:
-        # add all the information from the dataframe
-        result = [ignore_and_return_result(add_all_info(x), ['pub_date']) for x in tqdm(data_frame['ID'])]
+        # add all the samples that don't have NA values
+        data_frame = data.loc[data['doi'].apply(type) != float].reset_index(drop=True)
 
-        # concat the dataframes
-        data_frame = pd.concat([data_frame, pd.DataFrame(result)], axis=1)
+        # eliminate all the samples that are not published in 2014
+        data_frame = data_frame.loc[data_frame['pub_date'].apply(get_year_from_epoch) == 2014]
+
+        # reset the index again
+        data_frame = data_frame.reset_index(drop=True)
+
+        # consider the entries that have abstracts
+        data_frame = data_frame.loc[data_frame['abstract'].apply(type) == str]
 
         # return the dataframe
         return data_frame
@@ -121,23 +128,13 @@ def data_processing(data_frame):
 
 if __name__ == '__main__':
     # read the data
-    data = data_load('altmetrics_j2014_full.csv')
-
-    # eliminate the articles that are published prior to 2014
-    data = eliminate_row_by_pubdate(data)
+    data = data_load('altmetrics_j2014_full_alpha.csv')
 
     # process the dataframe
     data = data_processing(data)
 
     # export the data to a csv file
-    data.to_csv('altmetrics_j2014_full_alpha.csv')
-
-    # print the head of the
-    #print(data.head())
-
-    # print the number of NA's in the DOI column
-    #print(data_prepare()['DOI'].isnull().sum().sum())
+    data.to_csv('altmetrics_j2014_full_beta.csv')
 else:
     print('ERR: unable to run the script')
     sys.exit(0)
-
