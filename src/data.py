@@ -61,10 +61,10 @@ def data_processing(file_path):
         data = pd.read_csv(file_path, low_memory=False)
 
         # get a sample of the data
-        data = raw_data.sample(frac=0.03, random_state=2019).reset_index(drop=True)
+        data = data.sample(frac=0.25, random_state=2019).reset_index(drop=True)
 
         # add a column
-        data = data.assign(exp_3_sigmoid = list(map(sigmoid, tqdm(data['exp_3']))))
+        data = data.assign(exp_3_sigmoid = list(map(sigmoid, tqdm(data['twitter_count_y18']))))
 
         # drop the columns unecessary
         data = data.drop(columns=['Unnamed: 0'])
@@ -75,7 +75,7 @@ def data_processing(file_path):
         return pd.DataFrame()
 
 # function for preparing word embeddings
-def prepare_word_embeddings(data):
+def prepare_word_embeddings(data, X, Y):
     """
     Prepare the word embeddings for the abstracts of every scholarly paper
 
@@ -84,6 +84,11 @@ def prepare_word_embeddings(data):
     arg1 | data: pandas.DataFrame
         A dataframe consisting of necessary columns for extracting abstract
         and the target variable
+    arg2 | X: numpy.ndarray
+        An array consisting of texts from the dataframe that would be converted
+        into word embeddings
+    arg3 | Y: numpy.ndarray
+        An array consisting of the label values for the target variable
 
     Returns
     -------
@@ -91,32 +96,32 @@ def prepare_word_embeddings(data):
         numpy.ndarray, numpy.ndarray, int, int
 
     """
-    try:
-        # find the maximum words and maximum length for the given dataset
-        max_words = max(list(map(lambda x: len(x.split()), tqdm(data['abstract']))))
+    # try:
+    # find the maximum words and maximum length for the given dataset
+    max_words = max(list(map(lambda x: len(x.split()), tqdm(data[X]))))
 
-        # find max length of the text for the given dataset
-        max_len = max(list(map(len, tqdm(data['abstract']))))
+    # find max length of the text for the given dataset
+    max_len = max(list(map(len, tqdm(data[X]))))
 
-        # init the tokenizer class object
-        tok = Tokenizer(num_words=max_words)
+    # init the tokenizer class object
+    tok = Tokenizer(num_words=max_words)
 
-        # fit the tokenizer on the text data
-        tok.fit_on_texts(data.abstract)
+    # fit the tokenizer on the text data
+    tok.fit_on_texts(data[X])
 
-        # generate the sequences
-        sequences = tok.texts_to_sequences(data.abstract)
+    # generate the sequences
+    sequences = tok.texts_to_sequences(data[X])
 
-        # obtain the sequence matrix
-        X = sequence.pad_sequences(sequences, maxlen=max_len)
+    # obtain the sequence matrix
+    X = sequence.pad_sequences(sequences, maxlen=max_len)
 
-        # the target variable
-        Y = data.exp_3_sigmoid.values
+    # the target variable
+    Y = data[Y].values
 
-        # reshape the target variable
-        Y = Y.reshape(-1, 1)
+    # reshape the target variable
+    Y = Y.reshape(-1, 1)
 
-        # return the dataframe
-        return X, Y, max_words, max_len
-    except:
-        return np.zeros(20).reshape(2, 10), np.zeros(10), np.zeros(1)[0], np.zeros(1)[0]
+    # return the dataframe
+    return X, Y, max_words, max_len
+    # except:
+    #     return np.zeros(20).reshape(2, 10), np.zeros(10), np.zeros(1)[0], np.zeros(1)[0]

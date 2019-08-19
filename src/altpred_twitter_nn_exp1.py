@@ -5,16 +5,16 @@
 
 import sys
 from models import AltpredTwitterGRU
-from evaluation import evaluate, metrics
-from data import data_processing, prepare_X_Y
+from evaluation import evaluate, clf_metrics
+from data import data_processing, prepare_word_embeddings
 from sklearn.model_selection import train_test_split
 
 if __name__ == '__main__':
     # load the dataset
-    data = data_processing('altpred_dataset_2.csv')
+    data = data_processing('altmetrics_j2014_full_beta.csv')
 
     # prepare the X, Y
-    X, Y, max_words, max_len = prepare_word_embeddings(data)
+    X, Y, max_words, max_len = prepare_word_embeddings(data, 'abstract', 'twitter_count_y18')
 
     # build the train and test samples
     X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.35)
@@ -23,17 +23,17 @@ if __name__ == '__main__':
     classifier = AltpredTwitterGRU(max_words, max_len)
 
     # train the model
-    classifier = classifier.train(5, 256, X_train, X_test, Y_train, Y_test, stopping=False)
+    classifier = classifier.train(5, 256, X_train, Y_train, stopping=False)
 
     # evaluate and print the training stats
-    model_evaluation = evaluate(classifier, x_train=X_train, y_train=Y_train)
+    model_evaluation = evaluate(classifier, 'train', x_train=X_train, y_train=Y_train)
 
     # print training metrics
     print('Training Loss:', model_evaluation[0])
     print('Training Accuracy:', model_evaluation[1])
 
     # print the test set metrcs [acc, prec, recall, f1]
-    model_evaluation = metrics(classifier, x_test=X_test, y_test=Y_test)
+    model_evaluation = clf_metrics(classifier, x_test=X_test, y_test=Y_test)
 
     # test accuracy
     print('Test accuracy:', model_evaluation[0])
