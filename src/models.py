@@ -27,7 +27,7 @@ class AltpredTwitterGRU(Model):
 
     """
     # function for preparing the X & Y for the dataset
-    def __init__(self):
+    def __init__(self, max_words, max_len):
         """
         Build the GRU neural network model and compile it
 
@@ -135,7 +135,7 @@ class AltpredTwitterLSTM(Model):
 
     """
     # function for preparing the X & Y for the dataset
-    def __init__(self):
+    def __init__(self, max_words, max_len):
         """
         Build the LSTM neural network model and compile it
 
@@ -231,7 +231,7 @@ class AltpredTwitterBiDirLSTM(Model):
 
     """
     # function for preparing the X & Y for the dataset
-    def __init__(self):
+    def __init__(self, max_words, max_len):
         """
         Build the LSTM neural network model and compile it
 
