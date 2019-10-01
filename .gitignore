@@ -17,3 +17,8 @@ tramp
 # csv files
 *.csv
 src/*.csv
+
+# python files
+*.pyc
+src/*.pyc
+src/__pycache__
