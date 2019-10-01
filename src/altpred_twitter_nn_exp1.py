@@ -14,7 +14,7 @@ if __name__ == '__main__':
     data = data_processing('altmetrics_j2014_full_beta.csv')
 
     # prepare the X, Y
-    X, Y, max_words, max_len = prepare_word_embeddings(data, 'abstract', 'twitter_count_y18')
+    X, Y, max_words, max_len = prepare_word_embeddings(data, 'abstract', 'target_exp_2')
 
     # build the train and test samples
     X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.35)

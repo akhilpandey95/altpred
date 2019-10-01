@@ -9,37 +9,6 @@ from tqdm import tqdm
 from tensorflow.keras.preprocessing import sequence
 from tensorflow.keras.preprocessing.text import Tokenizer
 
-# function for computing sigmoid of a value
-def sigmoid(value, derivative=False):
-    """
-    Return the sigmoid of a numeric value
-
-    Parameters
-    ----------
-    arg1 | value: int
-        The numeric value intended to convert into a continuos range
-
-    Returns
-    -------
-    Float
-        float
-
-    """
-    try:
-        # compute the sigmoid
-        result = 1. / (1. + np.exp(-x))
-
-        # check if derivative is required
-        if derivative:
-            # return the sigmoid
-            return result * (1. - result)
-
-        # return the sigmoid
-        return result
-    except:
-        # return zero
-        return np.zeros(1)[0]
-
 # function for processing the dataset
 def data_processing(file_path):
     """
@@ -62,9 +31,6 @@ def data_processing(file_path):
 
         # get a sample of the data
         data = data.sample(frac=0.25, random_state=2019).reset_index(drop=True)
-
-        # add a column
-        data = data.assign(exp_3_sigmoid = list(map(sigmoid, tqdm(data['twitter_count_y18']))))
 
         # drop the columns unecessary
         data = data.drop(columns=['Unnamed: 0'])
@@ -96,32 +62,32 @@ def prepare_word_embeddings(data, X, Y):
         numpy.ndarray, numpy.ndarray, int, int
 
     """
-    # try:
-    # find the maximum words and maximum length for the given dataset
-    max_words = max(list(map(lambda x: len(x.split()), tqdm(data[X]))))
+    try:
+        # find the maximum words and maximum length for the given dataset
+        max_words = max(list(map(lambda x: len(x.split()), tqdm(data[X]))))
 
-    # find max length of the text for the given dataset
-    max_len = max(list(map(len, tqdm(data[X]))))
+        # find max length of the text for the given dataset
+        max_len = max(list(map(len, tqdm(data[X]))))
 
-    # init the tokenizer class object
-    tok = Tokenizer(num_words=max_words)
+        # init the tokenizer class object
+        tok = Tokenizer(num_words=max_words)
 
-    # fit the tokenizer on the text data
-    tok.fit_on_texts(data[X])
+        # fit the tokenizer on the text data
+        tok.fit_on_texts(data[X])
 
-    # generate the sequences
-    sequences = tok.texts_to_sequences(data[X])
+        # generate the sequences
+        sequences = tok.texts_to_sequences(data[X])
 
-    # obtain the sequence matrix
-    X = sequence.pad_sequences(sequences, maxlen=max_len)
+        # obtain the sequence matrix
+        X = sequence.pad_sequences(sequences, maxlen=max_len)
 
-    # the target variable
-    Y = data[Y].values
+        # the target variable
+        Y = data[Y].values
 
-    # reshape the target variable
-    Y = Y.reshape(-1, 1)
+        # reshape the target variable
+        Y = Y.reshape(-1, 1)
 
-    # return the dataframe
-    return X, Y, max_words, max_len
-    # except:
-    #     return np.zeros(20).reshape(2, 10), np.zeros(10), np.zeros(1)[0], np.zeros(1)[0]
+        # return the dataframe
+        return X, Y, max_words, max_len
+    except:
+        return np.zeros(20).reshape(2, 10),np.zeros(10),np.zeros(1)[0],np.zeros(1)[0]
