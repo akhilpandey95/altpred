@@ -11,10 +11,10 @@ from sklearn.model_selection import train_test_split
 
 if __name__ == '__main__':
     # load the dataset
-    data = data_processing('altmetrics_j2014_full_beta.csv')
+    data = data_processing('altmetrics_j2014_full_gamma.csv' ,'binary')
 
     # prepare the X, Y
-    X, Y, max_words, max_len = prepare_word_embeddings(data, 'abstract', 'target_exp_2')
+    X, Y, max_words, max_len = prepare_word_embeddings(data, 'abstract', 'target')
 
     # build the train and test samples
     X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.35)

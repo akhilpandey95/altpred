@@ -6,11 +6,12 @@
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
+from ast import literal_eval
 from tensorflow.keras.preprocessing import sequence
 from tensorflow.keras.preprocessing.text import Tokenizer
 
 # function for processing the dataset
-def data_processing(file_path):
+def data_processing(file_path, target):
     """
     Process the dataset and prepare it for using it against the neural network model
 
@@ -18,6 +19,8 @@ def data_processing(file_path):
     ----------
     arg1 | file_path: str
         The file path indicating the location of the dataset
+    arg2 | target: str
+        The type of target variable going to be used for the experiment
 
     Returns
     -------
@@ -30,10 +33,27 @@ def data_processing(file_path):
         data = pd.read_csv(file_path, low_memory=False)
 
         # get a sample of the data
-        data = data.sample(frac=0.25, random_state=2019).reset_index(drop=True)
+        data = data.sample(frac=0.25, random_state=2019)
+
+        # reset the index for the dataframe
+        data = data.reset_index(drop=True)
 
         # drop the columns unecessary
         data = data.drop(columns=['Unnamed: 0'])
+
+        # remove the entries which don't have a title
+        data = data.loc[data.title.apply(type) != float].reset_index(drop=True)
+
+        # convert the pub_subjects column into a list
+        data = data.assign(pub_subjects = list(map(lambda x: ' '.join(literal_eval(x)), tqdm(data['pub_subjects']))))
+
+        # check the experiment and create the target variable accordingly
+        if target == 'binary':
+            # create the target variable for the binary experiment
+            data = data.assign(target = list(map(lambda x, y: 0 if x == y else 1, tqdm(data['TWITTER_ACCOUNTS']), tqdm(data['twitter_count_y18']))))
+        else:
+            # create the target variable for multi class experiment
+            data = data.assign(target = list(map(lambda x, y: 0 if x > y else 2 if x < y else 1, tqdm(data['TWIITER_ACCOUNTS']), tqdm(data['twitter_count_y18']))))
 
         # return the dataframe
         return data
