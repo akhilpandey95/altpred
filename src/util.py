@@ -11,6 +11,8 @@ import requests
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
+from ast import literal_eval
+from preprocessing import LDA
 from bs4 import BeautifulSoup as BS
 from collections import defaultdict
 
@@ -147,6 +149,11 @@ def extract_article_information_year_2014(soup):
                         soup.find('div', class_='details').find('table', class_='article-data') \
                         .find_all('th') if 'Journal' in x.text][0]
 
+        # add the journal name of the article
+        data['category'] = [x.find_next('td').text for x in \
+                        soup.find('div', class_='details').find('table', class_='article-data') \
+                        .find_all('th') if 'Category' in x.text][0]
+
         # add the tweet count of the article
         data['tweet_count'] = int([x.next_sibling.text.split(' ') \
                     for x in \
@@ -157,8 +164,73 @@ def extract_article_information_year_2014(soup):
     except:
         return None
 
+# function for iterating the information extraction from the soup object
+def get_info_top_n(n, year, function, data, save=False):
+    """
+    Iterate and collect article information from the soup object
+    for n articles belonging to a given year
+
+    Parameters
+    ----------
+    arg1 | n: int
+        Number of articles we are looking to extrapolte information
+    arg2 | year: int
+        The specific year we are looking to extrapolte information
+    arg3 | function: function
+        The function needed to extract article information for that specific year
+    arg4 | data: collections.defaultdict
+        The function needed to extract article information for that specific year
+
+    Returns
+    -------
+    Dataframe
+        pandas.DataFrame
+
+    """
+    try:
+        # iterate over the function given as input to obtain article information
+        result = [function(data(year)[number]) for number in tqdm(range(n))]
+
+        # convert the dict into a dataframe
+        result = pd.DataFrame(result)
+
+        # check if the save flag is given as an input
+        # in order to write the data to a CSV file
+        if save:
+            # save the dataframe into a csv
+            result.to_csv(str(function) + '_' + str(year) + '.csv', encoding='utf-8')
+
+        # return the data
+        return result
+    except:
+        return None
+
 if __name__ == '__main__':
-    # test if the we are able to extract information for the 1st article from 2014 list
-    print(extract_article_information_year_2014(soupify(2014)[0]))
+    # extract the information f
+    print(get_info_top_n(3, 2014, extract_article_information_year_2014, soupify))
+
+    # read a dataframe
+    data = pd.read_csv('altmetrics_j2014_full_gamma.csv')
+
+    # preprocess the dataframe
+    data = data.assign(pub_subjects = list(map(literal_eval, data['pub_subjects'])))
+
+    # remove NA values
+    data = data.loc[data.pub_subjects.apply(len) != 0].reset_index(drop=True)
+
+    # obtain the X samples
+    X = [', '.join(x) for x in data['pub_subjects']]
+
+    # init the LDA class object
+    model = LDA()
+
+    # tokenize and normalize the input
+    input = [model.normalize(doc).split() for doc in tqdm(X[:10])]
+
+    # train the LDA model
+    output = model.train(input, 10, 5)
+
+    # print the topics
+    print(output.print_topics(num_topics=10, num_words=5))
 else:
     sys.exit(0)
