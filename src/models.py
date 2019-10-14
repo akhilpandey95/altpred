@@ -51,16 +51,16 @@ class AltpredTwitterGRU(Model):
         self.model.add(Embedding(max_words, 64, input_length=max_len))
 
         # add the first GRU layer with 32 units
-        self.model.add(GRU(32, return_sequences=True))
+        self.model.add(GRU(128, return_sequences=True))
 
         # add the first GRU layer with 16 units
-        self.model.add(GRU(16, return_sequences=True))
+        #self.model.add(GRU(64, return_sequences=True))
 
         # add the first GRU layer with 8 units
-        self.model.add(GRU(8, return_sequences=True))
+        #self.model.add(GRU(8, return_sequences=True))
 
         # add the fourth GRU layer with 4 units
-        self.model.add(GRU(4))
+        self.model.add(GRU(64))
 
         # add a simpleRNN layer with 64 units
         # self.model.add(SimpleRNN(64))
@@ -72,7 +72,7 @@ class AltpredTwitterGRU(Model):
         self.rms = keras.optimizers.RMSprop(lr=0.001)
 
         # compile the model
-        self.model.compile(optimizer=self.rms, loss='binary_crossentropy', metrics =['accuracy'])
+        self.model.compile(optimizer='adam', loss='binary_crossentropy', metrics =['accuracy'])
 
     # function for training the neural network model
     def train(self, epochs, batch_size, X_train, Y_train, stopping=True):
@@ -159,16 +159,16 @@ class AltpredTwitterLSTM(Model):
         self.model.add(Embedding(max_words, 64, input_length=max_len))
 
         # add an LSTM layer with 64 units
-        self.model.add(LSTM(32))
+        self.model.add(LSTM(256))
 
         # add the output layer containing the label
-        self.model.add(Dense(1, activation='softmax'))
+        self.model.add(Dense(1, activation='sigmoid'))
 
         # use the rmsprop optimizer
         self.rms = keras.optimizers.RMSprop(lr=0.001)
 
         # compile the model
-        self.model.compile(optimizer=self.rms, loss='binary_crossentropy', metrics =['accuracy'])
+        self.model.compile(optimizer='adam', loss='binary_crossentropy', metrics =['accuracy'])
 
     # function for training the neural network model
     def train(self, epochs, batch_size, X_train, Y_train, stopping=True):
@@ -257,7 +257,7 @@ class AltpredTwitterBiDirLSTM(Model):
         self.model.add(Embedding(max_words, 64, input_length=max_len))
 
         # add a Bidirectional LSTM layer with 64 units
-        self.model.add(Bidirectional(LSTM(32, return_sequences=True)))
+        self.model.add(Bidirectional(LSTM(128, return_sequences=True)))
 
         # add a Bidirectional LSTM layer with 32 units
         self.model.add(Bidirectional(LSTM(32)))
@@ -269,7 +269,7 @@ class AltpredTwitterBiDirLSTM(Model):
         self.rms = keras.optimizers.RMSprop(lr=0.001)
 
         # compile the model
-        self.model.compile(optimizer=self.rms, loss='binary_crossentropy', metrics =['accuracy'])
+        self.model.compile(optimizer='adam', loss='binary_crossentropy', metrics =['accuracy'])
 
     # function for training the neural network model
     def train(self, epochs, batch_size, X_train, Y_train, stopping=True):

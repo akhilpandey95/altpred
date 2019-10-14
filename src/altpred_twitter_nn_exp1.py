@@ -4,14 +4,15 @@
 # https://github.com/akhilpandey95/altpred/blob/master/LICENSE.
 
 import sys
-from models import AltpredTwitterGRU
+from models import *
 from evaluation import evaluate, clf_metrics
 from data import data_processing, prepare_word_embeddings
 from sklearn.model_selection import train_test_split
 
 if __name__ == '__main__':
     # load the dataset
-    data = data_processing('altmetrics_j2014_full_gamma.csv' ,'binary')
+    #data = data_processing('altmetrics_j2014_full_gamma.csv', 'binary')
+    data = data_processing('altmetrics_j2014_full_gamma.csv' ,'binary-delta')
 
     # prepare the X, Y
     X, Y, max_words, max_len = prepare_word_embeddings(data, 'abstract', 'target')
@@ -21,6 +22,8 @@ if __name__ == '__main__':
 
     # build the model
     classifier = AltpredTwitterGRU(max_words, max_len)
+    #classifier = AltpredTwitterLSTM(max_words, max_len)
+    #classifier = AltpredTwitterBiDirLSTM(max_words, max_len)
 
     # train the model
     classifier = classifier.train(5, 256, X_train, Y_train, stopping=False)

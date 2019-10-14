@@ -7,7 +7,6 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 from ast import literal_eval
-from preprocessing import LDA
 from tensorflow.keras.preprocessing import sequence
 from tensorflow.keras.preprocessing.text import Tokenizer
 
@@ -52,9 +51,26 @@ def data_processing(file_path, target):
         if target == 'binary':
             # create the target variable for the binary experiment
             data = data.assign(target = list(map(lambda x, y: 0 if x == y else 1, tqdm(data['TWITTER_ACCOUNTS']), tqdm(data['twitter_count_y18']))))
+        elif target == 'binary-delta':
+            # create the target variable for multi class experiment
+            data = data.assign(target = list(map(lambda x, y: 0 if x > y else 2 if x < y else 1, tqdm(data['TWITTER_ACCOUNTS']), tqdm(data['twitter_count_y18']))))
+
+            # remove the class 1 and retain the remaining classes
+            data = data.loc[(data.target == 0) | (data.target == 2)]
+
+            # remove the rows that don't have text value
+            data = data.loc[data.title.apply(type) != float]
+            data = data.loc[data.abstract.apply(type) != float]
+            data = data.loc[data.pub_subjects.apply(type) != float]
+
+            # change the label 2 to 1
+            data = data.assign(target = list(map(lambda x: 1 if x == 2 else 0, data['target'])))
+
+            # reset the index
+            data = data.reset_index(drop=True)
         else:
             # create the target variable for multi class experiment
-            data = data.assign(target = list(map(lambda x, y: 0 if x > y else 2 if x < y else 1, tqdm(data['TWIITER_ACCOUNTS']), tqdm(data['twitter_count_y18']))))
+            data = data.assign(target = list(map(lambda x, y: 0 if x > y else 2 if x < y else 1, tqdm(data['TWITTER_ACCOUNTS']), tqdm(data['twitter_count_y18']))))
 
         # return the dataframe
         return data
