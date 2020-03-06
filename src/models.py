@@ -263,13 +263,13 @@ class AltpredTwitterBiDirLSTM(Model):
         self.model.add(Bidirectional(LSTM(32)))
 
         # add the output layer containing the label
-        self.model.add(Dense(1, activation='softmax'))
+        self.model.add(Dense(2, activation='softmax'))
 
         # use the rmsprop optimizer
         self.rms = keras.optimizers.RMSprop(lr=0.001)
 
         # compile the model
-        self.model.compile(optimizer='adam', loss='binary_crossentropy', metrics =['accuracy'])
+        self.model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics =['accuracy'])
 
     # function for training the neural network model
     def train(self, epochs, batch_size, X_train, Y_train, stopping=True):
